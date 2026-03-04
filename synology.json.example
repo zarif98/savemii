@@ -1,0 +1,8 @@
+{
+  "server": "mynas.quickconnect.to",
+  "account": "your_username",
+  "password": "your_password",
+  "device_id": "",
+  "upload_path": "/wiiu_backups",
+  "enabled": true
+}

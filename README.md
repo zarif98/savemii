@@ -112,6 +112,46 @@ This task allows you to restore the savedata for all titles already installed in
 ### Backupset management
 In this menu you can tag backupsets ("+") or delete the ones you don't need ("-"). You can also set the one you want to use to restore savedata ("A").
 
+### Synology NAS Cloud Backup
+
+SaveMii can automatically upload your backups to a Synology NAS via QuickConnect (remote HTTPS). After each backup, save files are uploaded to your NAS for safe cloud storage.
+
+#### Setup
+
+1. **Install required devkitPro packages** (build-time only):
+   ```bash
+   dkp-pacman -S wiiu-curl wiiu-mbedtls
+   ```
+
+2. **Create the config file** on your SD card at `sd:/wiiu/backups/synology.json`:
+   ```json
+   {
+     "server": "mynas.quickconnect.to",
+     "account": "your_username",
+     "password": "your_password",
+     "device_id": "",
+     "upload_path": "/wiiu_backups",
+     "enabled": true
+   }
+   ```
+
+3. **If you have 2FA enabled**, first use the `test_connection.js` tool from [MMM-SynologyPhotos](https://github.com/zarif98/MMM-SynologyPhotos) to get a device token, then paste the `device_id` value into your `synology.json`.
+
+4. **Create the destination folder** on your NAS (e.g. `/wiiu_backups`) via DSM File Station.
+
+5. Backups will automatically upload after each save. The upload status is shown on screen during the process.
+
+#### Config Options
+
+| Field | Description |
+|-------|-------------|
+| `server` | Your QuickConnect URL or direct NAS IP |
+| `account` | Synology username |
+| `password` | Synology password |
+| `device_id` | 2FA device token (leave empty if no 2FA) |
+| `upload_path` | Destination folder on NAS |
+| `enabled` | Set to `false` to disable uploads |
+
 
 ----
 

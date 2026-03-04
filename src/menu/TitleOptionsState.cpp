@@ -445,6 +445,7 @@ ApplicationState::eSubState TitleOptionsState::update(Input *input) {
             switch (this->task) {
                 case backup:
                     backupSavedata(&this->title, slot, wiiuuser, common);
+                    uploadBackupToSynology(this->title.highID, this->title.lowID, slot);
                     DrawUtils::setRedraw(true);
                     break;
                 case restore:

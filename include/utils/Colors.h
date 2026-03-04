@@ -31,3 +31,4 @@
 #define COLOR_BG_WR      Color(0xBB7F0000)
 #define COLOR_BG_KO      Color(0x7F000000)
 #define COLOR_BG_ERROR Color(0xAA0000FF)
+#define COLOR_BG_SYNOLOGY Color(0x0060AAFF)

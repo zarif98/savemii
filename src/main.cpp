@@ -609,6 +609,10 @@ int main() {
 
 
     resetMessageList();
+    addInitMessageWithIcon(LanguageUtils::gettext("Initializing Synology NAS upload."));
+
+    initSynologyUpload();
+
     addInitMessageWithIcon(LanguageUtils::gettext("Initializing BackupSets metadata."));
 
     BackupSetList::initBackupSetList();
@@ -653,6 +657,7 @@ int main() {
 
     unloadTitles(wiiutitles, wiiuTitlesCount);
     unloadTitles(wiititles, vWiiTitlesCount);
+    shutdownSynologyUpload();
     shutdownFS();
     LanguageUtils::gettextCleanUp();
     romfsExit();

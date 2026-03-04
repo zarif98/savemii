@@ -176,4 +176,11 @@ Account *getSDacc();
 void deleteSlot(Title *title, uint8_t slot);
 bool wipeBackupSet(const std::string &subPath);
 void splitStringWithNewLines(const std::string &input, std::string &output);
-void sdWriteDisclaimer(); 
+void sdWriteDisclaimer();
+
+// Synology NAS upload helpers
+void initSynologyUpload();
+void shutdownSynologyUpload();
+bool isSynologyUploadEnabled();
+void uploadBackupToSynology(uint32_t highID, uint32_t lowID, uint8_t slot);
+void uploadBatchBackupToSynology(const std::string &batchDatetime);

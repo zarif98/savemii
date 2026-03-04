@@ -1769,3 +1769,87 @@ void sdWriteDisclaimer() {
     DrawUtils::endDraw();
     firstSDWrite = false;
 }
+
+// ─── Synology NAS Upload Integration ───
+#include <SynologyUpload.h>
+
+static SynologyUpload *synoUploader = nullptr;
+
+void initSynologyUpload() {
+    if (synoUploader) return;
+
+    synoUploader = new SynologyUpload();
+    if (synoUploader->loadConfig() && synoUploader->isEnabled()) {
+        SynologyUpload::initNetwork();
+    }
+}
+
+void shutdownSynologyUpload() {
+    if (synoUploader) {
+        SynologyUpload::shutdownNetwork();
+        delete synoUploader;
+        synoUploader = nullptr;
+    }
+}
+
+bool isSynologyUploadEnabled() {
+    return synoUploader && synoUploader->isEnabled();
+}
+
+void uploadBackupToSynology(uint32_t highID, uint32_t lowID, uint8_t slot) {
+    if (!isSynologyUploadEnabled()) return;
+
+    std::string localPath = getDynamicBackupPath(highID, lowID, slot);
+    if (checkEntry(localPath.c_str()) <= 0) return;
+
+    promptMessage(COLOR_BG_SYNOLOGY,
+        LanguageUtils::gettext("Uploading backup to Synology NAS...\n%s"),
+        synoUploader->getServer().c_str());
+
+    if (!synoUploader->login()) {
+        promptError("Synology login failed: %s", synoUploader->getLastError().c_str());
+        return;
+    }
+
+    std::string remotePath = StringUtils::stringFormat("%s/%08x%08x/%u",
+        synoUploader->getUploadPath().c_str(), highID, lowID, slot);
+
+    if (synoUploader->uploadDirectory(localPath, remotePath)) {
+        promptMessage(COLOR_BG_SYNOLOGY,
+            LanguageUtils::gettext("Upload complete!"));
+        OSSleepTicks(OSMillisecondsToTicks(1500));
+    } else {
+        promptError("Synology upload failed: %s", synoUploader->getLastError().c_str());
+    }
+
+    synoUploader->logout();
+}
+
+void uploadBatchBackupToSynology(const std::string &batchDatetime) {
+    if (!isSynologyUploadEnabled()) return;
+
+    std::string localPath = getBatchBackupPathRoot(batchDatetime);
+    if (checkEntry(localPath.c_str()) <= 0) return;
+
+    promptMessage(COLOR_BG_SYNOLOGY,
+        LanguageUtils::gettext("Uploading batch backup to Synology NAS...\n%s"),
+        synoUploader->getServer().c_str());
+
+    if (!synoUploader->login()) {
+        promptError("Synology login failed: %s", synoUploader->getLastError().c_str());
+        return;
+    }
+
+    std::string remotePath = StringUtils::stringFormat("%s/batch/%s",
+        synoUploader->getUploadPath().c_str(), batchDatetime.c_str());
+
+    if (synoUploader->uploadDirectory(localPath, remotePath)) {
+        promptMessage(COLOR_BG_SYNOLOGY,
+            LanguageUtils::gettext("Batch upload complete!"));
+        OSSleepTicks(OSMillisecondsToTicks(1500));
+    } else {
+        promptError("Synology upload failed: %s", synoUploader->getLastError().c_str());
+    }
+
+    synoUploader->logout();
+}

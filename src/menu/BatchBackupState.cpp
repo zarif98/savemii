@@ -64,6 +64,7 @@ ApplicationState::eSubState BatchBackupState::update(Input *input) {
                     backupAllSave(this->wiiutitles, this->wiiuTitlesCount, batchDatetime);
                     backupAllSave(this->wiititles, this->vWiiTitlesCount, batchDatetime);
                     writeBackupAllMetadata(batchDatetime,"WiiU and vWii titles");
+                    uploadBatchBackupToSynology(batchDatetime);
                     BackupSetList::setIsInitializationRequired(true);
                     DrawUtils::setRedraw(true);
                     break;
