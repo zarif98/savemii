@@ -4,5 +4,6 @@
   "password": "your_password",
   "device_id": "",
   "upload_path": "/wiiu_backups",
-  "enabled": true
+  "enabled": true,
+  "auto_backup_minutes": 0
 }

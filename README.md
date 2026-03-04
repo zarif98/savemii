@@ -131,7 +131,8 @@ SaveMii can automatically upload your backups to a Synology NAS via QuickConnect
      "password": "your_password",
      "device_id": "",
      "upload_path": "/wiiu_backups",
-     "enabled": true
+     "enabled": true,
+     "auto_backup_minutes": 0
    }
    ```
 
@@ -151,6 +152,7 @@ SaveMii can automatically upload your backups to a Synology NAS via QuickConnect
 | `device_id` | 2FA device token (leave empty if no 2FA) |
 | `upload_path` | Destination folder on NAS |
 | `enabled` | Set to `false` to disable uploads |
+| `auto_backup_minutes` | Auto-backup interval in minutes (0 = disabled) |
 
 
 ----

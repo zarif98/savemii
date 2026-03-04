@@ -184,3 +184,4 @@ void shutdownSynologyUpload();
 bool isSynologyUploadEnabled();
 void uploadBackupToSynology(uint32_t highID, uint32_t lowID, uint8_t slot);
 void uploadBatchBackupToSynology(const std::string &batchDatetime);
+void checkPeriodicBackup(Title *wiiutitles, int wiiuCount, Title *wiititles, int vWiiCount);

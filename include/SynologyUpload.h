@@ -63,6 +63,7 @@ public:
     const std::string &getServer() const { return server; }
     const std::string &getAccount() const { return account; }
     const std::string &getUploadPath() const { return uploadPath; }
+    int getAutoBackupMinutes() const { return autoBackupMinutes; }
 
     // Setters for config UI
     void setServer(const std::string &s) { server = s; }
@@ -99,6 +100,7 @@ private:
     std::string deviceId;
     std::string uploadPath;
     bool enabled;
+    int autoBackupMinutes;     // 0 = disabled, >0 = interval in minutes
 
     std::string sid;         // Session ID from login
     std::string lastError;

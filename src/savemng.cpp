@@ -1853,3 +1853,42 @@ void uploadBatchBackupToSynology(const std::string &batchDatetime) {
 
     synoUploader->logout();
 }
+
+// ─── Periodic Auto-Backup Timer ───
+#include <coreinit/time.h>
+
+static OSTime lastPeriodicBackupTime = 0;
+
+void checkPeriodicBackup(Title *wiiutitles, int wiiuCount, Title *wiititles, int vWiiCount) {
+    if (!isSynologyUploadEnabled()) return;
+    if (!synoUploader || synoUploader->getAutoBackupMinutes() <= 0) return;
+
+    OSTime now = OSGetSystemTime();
+
+    // Initialize timer on first call
+    if (lastPeriodicBackupTime == 0) {
+        lastPeriodicBackupTime = now;
+        return;
+    }
+
+    // Convert interval to ticks
+    int minutes = synoUploader->getAutoBackupMinutes();
+    OSTime intervalTicks = OSSecondsToTicks(minutes * 60);
+
+    if ((now - lastPeriodicBackupTime) < intervalTicks)
+        return;
+
+    // Time's up — run a batch backup + upload
+    lastPeriodicBackupTime = now;
+
+    const std::string batchDatetime = getNowDateForFolder();
+
+    promptMessage(COLOR_BG_SYNOLOGY,
+        LanguageUtils::gettext("Auto-backup: saving all titles to SD + Synology NAS..."));
+
+    backupAllSave(wiiutitles, wiiuCount, batchDatetime);
+    backupAllSave(wiititles, vWiiCount, batchDatetime);
+    writeBackupAllMetadata(batchDatetime, "Auto-backup");
+
+    uploadBatchBackupToSynology(batchDatetime);
+}

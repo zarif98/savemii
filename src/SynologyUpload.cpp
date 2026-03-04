@@ -26,7 +26,7 @@ static size_t writeCallback(void *contents, size_t size, size_t nmemb, void *use
 }
 
 SynologyUpload::SynologyUpload()
-    : enabled(false) {
+    : enabled(false), autoBackupMinutes(0) {
 }
 
 SynologyUpload::~SynologyUpload() {
@@ -119,6 +119,12 @@ bool SynologyUpload::loadConfig() {
     if (enabledVal)
         enabled = json_is_true(enabledVal);
 
+    json_t *autoVal = json_object_get(root, "auto_backup_minutes");
+    if (autoVal && json_is_integer(autoVal))
+        autoBackupMinutes = (int)json_integer_value(autoVal);
+    else
+        autoBackupMinutes = 0;
+
     json_decref(root);
     return true;
 }
@@ -133,6 +139,7 @@ bool SynologyUpload::saveConfig() {
     json_object_set_new(config, "device_id", json_string(deviceId.c_str()));
     json_object_set_new(config, "upload_path", json_string(uploadPath.c_str()));
     json_object_set_new(config, "enabled", enabled ? json_true() : json_false());
+    json_object_set_new(config, "auto_backup_minutes", json_integer(autoBackupMinutes));
 
     char *configString = json_dumps(config, JSON_INDENT(2));
     json_decref(config);

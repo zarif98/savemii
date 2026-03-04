@@ -636,6 +636,8 @@ int main() {
         if (input.get(TRIGGER, PAD_BUTTON_ANY))
             DrawUtils::setRedraw(true);
 
+        checkPeriodicBackup(wiiutitles, wiiuTitlesCount, wiititles, vWiiTitlesCount);
+
         if (DrawUtils::getRedraw()) {
             DrawUtils::beginDraw();
             DrawUtils::clear(COLOR_BACKGROUND);
