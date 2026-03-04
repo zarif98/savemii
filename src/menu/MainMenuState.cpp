@@ -11,9 +11,10 @@
 #include <utils/LanguageUtils.h>
 
 #include <menu/BatchRestoreState.h>
+#include <menu/SynologySettingsState.h>
 #include <utils/Colors.h>
 
-#define ENTRYCOUNT 5
+#define ENTRYCOUNT 6
 
 static int cursorPos = 0;
 
@@ -40,8 +41,21 @@ void MainMenuState::render() {
         consolePrintPos(M_OFF, 5, LanguageUtils::gettext("   Batch Restore"));
         DrawUtils::setFontColorByCursor(COLOR_TEXT,COLOR_TEXT_AT_CURSOR,cursorPos,4);   
         consolePrintPos(M_OFF, 6, LanguageUtils::gettext("   BackupSet Management"));
+        DrawUtils::setFontColorByCursor(COLOR_TEXT,COLOR_TEXT_AT_CURSOR,cursorPos,5);
+        consolePrintPos(M_OFF, 8, LanguageUtils::gettext("   Synology NAS Settings"));
+
+        // Synology status indicator
+        if (isSynologyUploadEnabled()) {
+            DrawUtils::setFontColor(COLOR_BG_SYNOLOGY);
+            consolePrintPos(M_OFF + 2, 9, "\u2601 Synology: ON");
+        } else {
+            DrawUtils::setFontColor(COLOR_LIST_SKIPPED);
+            consolePrintPos(M_OFF + 2, 9, "\u2601 Synology: OFF");
+        }
+
         DrawUtils::setFontColor(COLOR_TEXT);
-        consolePrintPos(M_OFF, 2 + cursorPos, "\u2192");
+        int yPos = (cursorPos < 5) ? (2 + cursorPos) : 8;
+        consolePrintPos(M_OFF, yPos, "\u2192");
         consolePrintPosAligned(17, 4, 2, LanguageUtils::gettext("\uE002: Options \ue000: Select Mode"));
     }
 }
@@ -70,7 +84,11 @@ ApplicationState::eSubState MainMenuState::update(Input *input) {
                     this->state = STATE_DO_SUBSTATE;
                     this->substateCalled = STATE_BACKUPSET_MENU;
                     this->subState = std::make_unique<BackupSetListState>();
-                    break;    
+                    break;
+                case 5:
+                    this->state = STATE_DO_SUBSTATE;
+                    this->subState = std::make_unique<SynologySettingsState>();
+                    break;
                 default:
                     break;
             }

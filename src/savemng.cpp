@@ -1775,6 +1775,10 @@ void sdWriteDisclaimer() {
 
 static SynologyUpload *synoUploader = nullptr;
 
+SynologyUpload *getSynologyUploader() {
+    return synoUploader;
+}
+
 void initSynologyUpload() {
     if (synoUploader) return;
 

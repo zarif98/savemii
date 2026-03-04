@@ -179,6 +179,8 @@ void splitStringWithNewLines(const std::string &input, std::string &output);
 void sdWriteDisclaimer();
 
 // Synology NAS upload helpers
+class SynologyUpload;
+SynologyUpload *getSynologyUploader();
 void initSynologyUpload();
 void shutdownSynologyUpload();
 bool isSynologyUploadEnabled();
