@@ -114,7 +114,7 @@ In this menu you can tag backupsets ("+") or delete the ones you don't need ("-"
 
 ### Synology NAS Cloud Backup
 
-SaveMii can automatically upload your backups to a Synology NAS via QuickConnect (remote HTTPS). After each backup, save files are uploaded to your NAS for safe cloud storage.
+SaveMii can automatically upload your backups to a Synology NAS via QuickConnect (remote HTTPS). After each backup, save files are uploaded to your NAS for safe cloud storage. All settings can be configured directly from the Wii U gamepad.
 
 #### Setup
 
@@ -123,7 +123,7 @@ SaveMii can automatically upload your backups to a Synology NAS via QuickConnect
    dkp-pacman -S wiiu-curl wiiu-mbedtls
    ```
 
-2. **Create the config file** on your SD card at `sd:/wiiu/backups/synology.json`:
+2. **Create the config file** on your SD card at `sd:/wiiu/backups/synology.json` (or configure from the Wii U — see below):
    ```json
    {
      "server": "mynas.quickconnect.to",
@@ -135,24 +135,68 @@ SaveMii can automatically upload your backups to a Synology NAS via QuickConnect
      "auto_backup_minutes": 0
    }
    ```
+   A sample file is provided at `synology.json.example` in the repo root.
 
-3. **If you have 2FA enabled**, first use the `test_connection.js` tool from [MMM-SynologyPhotos](https://github.com/zarif98/MMM-SynologyPhotos) to get a device token, then paste the `device_id` value into your `synology.json`.
+3. **Create the destination folder** on your NAS (e.g. `/wiiu_backups`) via DSM File Station.
 
-4. **Create the destination folder** on your NAS (e.g. `/wiiu_backups`) via DSM File Station.
+4. Backups will automatically upload after each save. The upload status is shown on screen with a blue banner during the process.
 
-5. Backups will automatically upload after each save. The upload status is shown on screen during the process.
+#### On-Console Settings
+
+All Synology settings can be managed directly from the Wii U without removing the SD card:
+
+1. From the **Main Menu**, select **Synology NAS Settings**
+2. Use **D-Pad Up/Down** to navigate between fields
+3. Press **A** to edit text fields (opens on-screen keyboard) or toggle options
+4. Use **D-Pad Left/Right** to toggle Enabled and cycle Auto-Backup intervals
+5. Press **+** to save the configuration to SD card
+
+The main menu also shows a status indicator: `☁ Synology: ON` (blue) or `☁ Synology: OFF`.
+
+#### 2FA Setup
+
+If your Synology account uses two-factor authentication:
+
+1. Go to **Synology NAS Settings** on the Wii U
+2. Make sure **Server**, **Account**, and **Password** are filled in and saved
+3. Navigate to **2FA Device Token: [ Setup 2FA ]** and press **A**
+4. Enter the **6-digit code** from your authenticator app (Google Authenticator, Authy, etc.)
+5. On success, SaveMii registers as a trusted device — the token is saved automatically
+6. Future logins will use the device token and **no OTP is needed again**
+
+To re-register, press **A** on "2FA Device Token: Registered" to clear the token, then repeat the setup.
+
+#### Auto-Backup
+
+SaveMii can periodically back up all titles and upload them to your NAS automatically:
+
+1. In **Synology NAS Settings**, set **Auto-Backup** to your desired interval (15 min, 30 min, 1 hr, 2 hr, or 4 hr)
+2. While SaveMii is running, it will automatically trigger a batch backup + upload when the interval elapses
+3. Set to **Disabled** (0) to turn off periodic backups
+
+Auto-backups are tagged as "Auto-backup" in the backup metadata.
 
 #### Config Options
 
 | Field | Description |
 |-------|-------------|
-| `server` | Your QuickConnect URL or direct NAS IP |
-| `account` | Synology username |
-| `password` | Synology password |
-| `device_id` | 2FA device token (leave empty if no 2FA) |
-| `upload_path` | Destination folder on NAS |
+| `server` | Your QuickConnect URL (e.g. `mynas.quickconnect.to`) or direct NAS IP |
+| `account` | Synology DSM username |
+| `password` | Synology DSM password |
+| `device_id` | 2FA device token (auto-filled by Setup 2FA, leave empty if no 2FA) |
+| `upload_path` | Destination folder on NAS (must exist) |
 | `enabled` | Set to `false` to disable uploads |
-| `auto_backup_minutes` | Auto-backup interval in minutes (0 = disabled) |
+| `auto_backup_minutes` | Periodic backup interval in minutes (`0` = disabled, e.g. `30` = every 30 min) |
+
+#### Troubleshooting
+
+| Error | Cause |
+|-------|-------|
+| `Network init failed` | Wii U is not connected to Wi-Fi |
+| `Invalid username or password` | Wrong credentials in config |
+| `2FA required` | Account has 2FA — use Setup 2FA in settings |
+| `Invalid 2FA code or expired device token` | OTP was wrong or token expired — re-run Setup 2FA |
+| `HTTP error: ...` | Network/DNS/firewall issue — check NAS is reachable |
 
 
 ----
