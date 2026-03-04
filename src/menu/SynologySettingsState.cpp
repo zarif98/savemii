@@ -95,19 +95,35 @@ void SynologySettingsState::render() {
             consolePrintPos(M_OFF, 7, LanguageUtils::gettext("   Auto-Backup: Every %d hr"), autoBackupMinutes / 60);
         }
 
+        // 2FA status
+        DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_2FA_STATUS);
+        {
+            SynologyUpload *up = getSynologyUploader();
+            bool hasTok = up && up->hasDeviceToken();
+            consolePrintPos(M_OFF, 9, hasTok
+                ? LanguageUtils::gettext("   2FA Device Token: Registered")
+                : LanguageUtils::gettext("   2FA Device Token: [ Setup 2FA ]"));
+        }
+
         // Test connection
         DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_TEST_CONNECTION);
-        consolePrintPos(M_OFF, 9, LanguageUtils::gettext("   [ Test Connection ]"));
+        consolePrintPos(M_OFF, 11, LanguageUtils::gettext("   [ Test Connection ]"));
 
         // Status message
         if (!statusMessage.empty()) {
             DrawUtils::setFontColor(statusIsError ? COLOR_LIST_DANGER : COLOR_BG_SYNOLOGY);
-            consolePrintPos(M_OFF + 2, 11, "%s", statusMessage.c_str());
+            consolePrintPos(M_OFF + 2, 13, "%s", statusMessage.c_str());
         }
 
         // Cursor
         DrawUtils::setFontColor(COLOR_TEXT);
-        int yPos = (cursorPos < FIELD_TEST_CONNECTION) ? (2 + cursorPos) : 9;
+        int yPos;
+        if (cursorPos <= FIELD_AUTO_BACKUP)
+            yPos = 2 + cursorPos;
+        else if (cursorPos == FIELD_2FA_STATUS)
+            yPos = 9;
+        else
+            yPos = 11;
         consolePrintPos(M_OFF, yPos, "\u2192");
 
         consolePrintPosAligned(17, 4, 2,
@@ -174,6 +190,31 @@ ApplicationState::eSubState SynologySettingsState::update(Input *input) {
                     this->state = STATE_DO_SUBSTATE;
                     this->subState = std::make_unique<KeyboardState>(keyboardBuffer);
                     break;
+                case FIELD_2FA_STATUS: {
+                    SynologyUpload *uploader = getSynologyUploader();
+                    if (!uploader) {
+                        statusMessage = "Error: Uploader not initialized";
+                        statusIsError = true;
+                        break;
+                    }
+
+                    if (uploader->hasDeviceToken()) {
+                        // Already registered — offer to clear
+                        uploader->clearDeviceToken();
+                        uploader->saveConfig();
+                        statusMessage = "Device token cleared. Re-setup needed.";
+                        statusIsError = false;
+                    } else {
+                        // Launch keyboard to enter OTP code
+                        keyboardBuffer = "";
+                        editingField = FIELD_2FA_STATUS;
+                        this->state = STATE_DO_SUBSTATE;
+                        this->subState = std::make_unique<KeyboardState>(keyboardBuffer);
+                        statusMessage = "Enter your 6-digit authenticator code";
+                        statusIsError = false;
+                    }
+                    break;
+                }
                 case FIELD_TEST_CONNECTION: {
                     statusMessage = "Testing connection...";
                     statusIsError = false;
@@ -257,6 +298,33 @@ ApplicationState::eSubState SynologySettingsState::update(Input *input) {
                 case FIELD_UPLOAD_PATH:
                     uploadPath = keyboardBuffer;
                     break;
+                case FIELD_2FA_STATUS: {
+                    // OTP code entered — attempt 2FA login to get device token
+                    if (!keyboardBuffer.empty()) {
+                        SynologyUpload *uploader = getSynologyUploader();
+                        if (uploader) {
+                            // Apply current settings before attempting OTP login
+                            uploader->setServer(server);
+                            uploader->setAccount(account);
+                            if (!password.empty())
+                                uploader->setPassword(password);
+
+                            SynologyUpload::initNetwork();
+
+                            statusMessage = "Verifying OTP code...";
+                            statusIsError = false;
+
+                            if (uploader->loginWithOtp(keyboardBuffer)) {
+                                statusMessage = "2FA setup complete! Device token saved.";
+                                statusIsError = false;
+                            } else {
+                                statusMessage = uploader->getLastError();
+                                statusIsError = true;
+                            }
+                        }
+                    }
+                    break;
+                }
                 default:
                     break;
             }

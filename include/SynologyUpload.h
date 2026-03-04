@@ -40,6 +40,19 @@ public:
     // Returns true if login successful. Sets sid internally.
     bool login();
 
+    // Login with OTP code for initial 2FA setup. Requests a device token.
+    // On success, device_id is saved to config automatically.
+    bool loginWithOtp(const std::string &otpCode);
+
+    // Get the last login error code (Synology API error code)
+    int getLastLoginErrorCode() const { return lastLoginErrorCode; }
+
+    // Check if a device token is registered
+    bool hasDeviceToken() const { return !deviceId.empty(); }
+
+    // Clear stored device token
+    void clearDeviceToken() { deviceId = ""; }
+
     // Logout / release session
     void logout();
 
@@ -104,6 +117,7 @@ private:
 
     std::string sid;         // Session ID from login
     std::string lastError;
+    int lastLoginErrorCode = 0;
 
     static bool networkInitialized;
 };

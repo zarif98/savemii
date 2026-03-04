@@ -20,6 +20,7 @@ public:
         FIELD_PASSWORD,
         FIELD_UPLOAD_PATH,
         FIELD_AUTO_BACKUP,
+        FIELD_2FA_STATUS,
         FIELD_TEST_CONNECTION,
         FIELD_COUNT
     };

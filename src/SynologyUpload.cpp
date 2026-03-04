@@ -273,14 +273,78 @@ bool SynologyUpload::login() {
     if (errObj) {
         errCode = json_integer_value(json_object_get(errObj, "code"));
     }
+    lastLoginErrorCode = errCode;
 
     switch (errCode) {
         case 400: lastError = "Invalid username or password"; break;
         case 401: lastError = "Account disabled"; break;
         case 402: lastError = "Permission denied"; break;
         case 403: lastError = "Invalid 2FA code or expired device token"; break;
-        case 404: lastError = "2FA required - set device_id in synology.json"; break;
+        case 404: lastError = "2FA required - use Setup 2FA to register this device"; break;
         default:  lastError = StringUtils::stringFormat("Login failed (error %d)", errCode); break;
+    }
+
+    json_decref(result);
+    return false;
+}
+
+bool SynologyUpload::loginWithOtp(const std::string &otpCode) {
+    if (!networkInitialized) {
+        initNetwork();
+    }
+
+    std::string baseUrl = getBaseUrl();
+    std::string apiPath = getApiPath();
+
+    // Build login URL with OTP and request a device token
+    std::string loginUrl = baseUrl + apiPath + "/auth.cgi"
+        "?api=SYNO.API.Auth"
+        "&version=6"
+        "&method=login"
+        "&account=" + account +
+        "&passwd=" + password +
+        "&otp_code=" + otpCode +
+        "&enable_device_token=yes"
+        "&device_name=SaveMii";
+
+    json_t *result = apiGet(loginUrl);
+    if (!result) {
+        return false;
+    }
+
+    json_t *success = json_object_get(result, "success");
+    if (json_is_true(success)) {
+        json_t *data = json_object_get(result, "data");
+        const char *sidVal = json_string_value(json_object_get(data, "sid"));
+        if (sidVal) {
+            sid = sidVal;
+
+            // Capture device token — this is the whole point of OTP login
+            const char *did = json_string_value(json_object_get(data, "did"));
+            if (!did) did = json_string_value(json_object_get(data, "device_id"));
+            if (did && strlen(did) > 0) {
+                deviceId = did;
+                saveConfig();
+            }
+
+            json_decref(result);
+            logout(); // We just needed the device token
+            return true;
+        }
+    }
+
+    // OTP login failed
+    json_t *errObj = json_object_get(result, "error");
+    int errCode = 0;
+    if (errObj) {
+        errCode = json_integer_value(json_object_get(errObj, "code"));
+    }
+    lastLoginErrorCode = errCode;
+
+    switch (errCode) {
+        case 403: lastError = "Invalid OTP code"; break;
+        case 404: lastError = "2FA code required"; break;
+        default:  lastError = StringUtils::stringFormat("OTP login failed (error %d)", errCode); break;
     }
 
     json_decref(result);
