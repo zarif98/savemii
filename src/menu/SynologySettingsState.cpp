@@ -1,11 +1,12 @@
-#include <menu/SynologySettingsState.h>
-#include <menu/KeyboardState.h>
-#include <savemng.h>
 #include <SynologyUpload.h>
+#include <coreinit/debug.h>
+#include <menu/KeyboardState.h>
+#include <menu/SynologySettingsState.h>
+#include <savemng.h>
+#include <utils/Colors.h>
+#include <utils/DrawUtils.h>
 #include <utils/InputUtils.h>
 #include <utils/LanguageUtils.h>
-#include <utils/DrawUtils.h>
-#include <utils/Colors.h>
 
 static int cursorPos = 0;
 
@@ -59,17 +60,17 @@ void SynologySettingsState::render() {
         // Enabled
         DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_ENABLED);
         consolePrintPos(M_OFF, 2, LanguageUtils::gettext("   Upload Enabled: %s"),
-            enabled ? LanguageUtils::gettext("Yes") : LanguageUtils::gettext("No"));
+                        enabled ? LanguageUtils::gettext("Yes") : LanguageUtils::gettext("No"));
 
         // Server
         DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_SERVER);
         consolePrintPos(M_OFF, 3, LanguageUtils::gettext("   Server: %s"),
-            server.empty() ? "(not set)" : server.c_str());
+                        server.empty() ? "(not set)" : server.c_str());
 
         // Account
         DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_ACCOUNT);
         consolePrintPos(M_OFF, 4, LanguageUtils::gettext("   Account: %s"),
-            account.empty() ? "(not set)" : account.c_str());
+                        account.empty() ? "(not set)" : account.c_str());
 
         // Password
         DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_PASSWORD);
@@ -83,7 +84,7 @@ void SynologySettingsState::render() {
         // Upload path
         DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_UPLOAD_PATH);
         consolePrintPos(M_OFF, 6, LanguageUtils::gettext("   Upload Path: %s"),
-            uploadPath.empty() ? "/wiiu_backups" : uploadPath.c_str());
+                        uploadPath.empty() ? "/wiiu_backups" : uploadPath.c_str());
 
         // Auto-backup
         DrawUtils::setFontColorByCursor(COLOR_TEXT, COLOR_TEXT_AT_CURSOR, cursorPos, FIELD_AUTO_BACKUP);
@@ -100,9 +101,7 @@ void SynologySettingsState::render() {
         {
             SynologyUpload *up = getSynologyUploader();
             bool hasTok = up && up->hasDeviceToken();
-            consolePrintPos(M_OFF, 9, hasTok
-                ? LanguageUtils::gettext("   2FA Device Token: Registered")
-                : LanguageUtils::gettext("   2FA Device Token: [ Setup 2FA ]"));
+            consolePrintPos(M_OFF, 9, hasTok ? LanguageUtils::gettext("   2FA Device Token: Registered") : LanguageUtils::gettext("   2FA Device Token: [ Setup 2FA ]"));
         }
 
         // Test connection
@@ -127,7 +126,7 @@ void SynologySettingsState::render() {
         consolePrintPos(M_OFF, yPos, "\u2192");
 
         consolePrintPosAligned(17, 4, 2,
-            LanguageUtils::gettext("\ue045: Save  \ue000: Edit  \ue001: Back"));
+                               LanguageUtils::gettext("\ue045: Save  \ue000: Edit  \ue001: Back"));
     }
 }
 

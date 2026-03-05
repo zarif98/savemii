@@ -53,7 +53,7 @@ CXXFLAGS	:= -std=gnu++20 -g -Wall -Wno-switch -Wno-format-overflow -Ofast -fperm
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -lz -lnn_ac -lwut -lmocha -ljansson
+LIBS	:= -lcurl -lbrotlidec -lbrotlicommon -lmbedtls -lmbedx509 -lmbedcrypto -lz -lwut -lmocha -ljansson
 
 include $(PORTLIBS_PATH)/wiiu/share/romfs-wiiu.mk
 CFLAGS		+=	$(ROMFS_CFLAGS)

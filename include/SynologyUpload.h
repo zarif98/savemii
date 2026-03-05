@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
+#include <cstdint>
 #include <jansson.h>
+#include <string>
 
 /**
  * Synology NAS uploader via File Station API over HTTPS.
@@ -113,9 +114,9 @@ private:
     std::string deviceId;
     std::string uploadPath;
     bool enabled;
-    int autoBackupMinutes;     // 0 = disabled, >0 = interval in minutes
+    int autoBackupMinutes; // 0 = disabled, >0 = interval in minutes
 
-    std::string sid;         // Session ID from login
+    std::string sid; // Session ID from login
     std::string lastError;
     int lastLoginErrorCode = 0;
 
